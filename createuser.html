@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create and Display Users</title>
+</head>
+<body>
+
+    <h1>Create User</h1>
+
+    <form id="createUserForm">
+        <label for="name">Name:</label>
+        <input type="text" id="name" name="name" required>
+
+        <br>
+
+        <label for="email">Email:</label>
+        <input type="email" id="email" name="email" required>
+
+        <br>
+
+        <label for="password">Password:</label>
+        <input type="password" id="password" name="password" required>
+
+        <br>
+
+        <input type="submit" value="Create User">
+    </form>
+
+    <h2>Users</h2>
+    <ul id="userList"></ul>
+
+    <script>
+        // Function to fetch and display users
+        function fetchAndDisplayUsers() {
+            fetch('http://127.0.0.1:8000/api/users')
+                .then(response => response.json())
+                .then(data => {
+                    console.log('Users:', data);
+                    const userList = document.getElementById('userList');
+                    userList.innerHTML = ''; // Clear previous list
+
+                    // Update the list of users
+                    data.users.forEach(user => {
+                        const listItem = document.createElement('li');
+                        listItem.textContent = user.name + ' - ' + user.email;
+                        userList.appendChild(listItem);
+                    });
+                })
+                .catch(error => {
+                    console.error('Error fetching users:', error);
+                });
+        }
+
+        // Fetch users on page load
+        document.addEventListener('DOMContentLoaded', fetchAndDisplayUsers);
+
+        // Event listener for form submission
+        document.getElementById('createUserForm').addEventListener('submit', function (event) {
+            event.preventDefault();
+
+            const formData = new FormData(event.target);
+
+            fetch('http://127.0.0.1:8000/api/users', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(Object.fromEntries(formData)),
+            })
+                .then(response => response.json())
+                .then(data => {
+                    console.log('Success:', data);
+                    alert('User created successfully!');
+                    // After creating a user, fetch and display the updated list of users
+                    fetchAndDisplayUsers();
+                })
+                .catch((error) => {
+                    console.error('Error:', error);
+                    alert('Error creating user. Please check the console for details.');
+                });
+        });
+    </script>
+
+</body>
+</html>
